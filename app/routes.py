@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify, Response
 from app.services import WalletService, FxService
 from decimal import Decimal, InvalidOperation
 from marshmallow import Schema, fields, ValidationError
-from typing import Tuple, Union, Any, Dict
+from typing import Tuple
 
 bp = Blueprint('main', __name__)
 
@@ -41,20 +41,20 @@ def fund_wallet(user_id: str) -> Tuple[Response, int]:
     try:
         schema = FundWalletSchema()
         data = schema.load(request.json)
-        
+
         result = WalletService.fund_wallet(
             user_id=user_id,
             currency=data['currency'],
             amount=data['amount']
         )
-        
+
         return jsonify(result), 200
-        
+
     except ValidationError as e:
         return jsonify({"error": "Validation error", "details": e.messages}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-    except Exception as e:
+    except Exception:
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/convert', methods=['POST'])
@@ -62,21 +62,21 @@ def convert_currency(user_id: str) -> Tuple[Response, int]:
     try:
         schema = ConvertCurrencySchema()
         data = schema.load(request.json)
-        
+
         result = WalletService.convert_currency(
             user_id=user_id,
             from_currency=data['from_currency'],
             to_currency=data['to_currency'],
             amount=data['amount']
         )
-        
+
         return jsonify(result), 200
-        
+
     except ValidationError as e:
         return jsonify({"error": "Validation error", "details": e.messages}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-    except Exception as e:
+    except Exception:
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/withdraw', methods=['POST'])
@@ -84,20 +84,20 @@ def withdraw_funds(user_id: str) -> Tuple[Response, int]:
     try:
         schema = WithdrawFundsSchema()
         data = schema.load(request.json)
-        
+
         result = WalletService.withdraw_funds(
             user_id=user_id,
             currency=data['currency'],
             amount=data['amount']
         )
-        
+
         return jsonify(result), 200
-        
+
     except ValidationError as e:
         return jsonify({"error": "Validation error", "details": e.messages}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
-    except Exception as e:
+    except Exception:
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/balances', methods=['GET'])
@@ -105,8 +105,8 @@ def get_balances(user_id: str) -> Tuple[Response, int]:
     try:
         balances = WalletService.get_balances(user_id)
         return jsonify(balances), 200
-        
-    except Exception as e:
+
+    except Exception:
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/transactions', methods=['GET'])
@@ -115,8 +115,8 @@ def get_transactions(user_id: str) -> Tuple[Response, int]:
         limit = request.args.get('limit', 100, type=int)
         transactions = WalletService.get_transactions(user_id, limit)
         return jsonify({"transactions": transactions}), 200
-        
-    except Exception as e:
+
+    except Exception:
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/reconcile', methods=['GET'])
@@ -124,8 +124,8 @@ def reconcile_balances(user_id: str) -> Tuple[Response, int]:
     try:
         result = WalletService.reconcile_balances(user_id)
         return jsonify(result), 200
-        
-    except Exception as e:
+
+    except Exception:
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/fx/rates', methods=['GET'])
@@ -133,8 +133,8 @@ def get_fx_rates() -> Tuple[Response, int]:
     try:
         rates = FxService.get_all_rates()
         return jsonify({"rates": rates}), 200
-        
-    except Exception as e:
+
+    except Exception:
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/fx/rates', methods=['PUT'])
@@ -144,19 +144,19 @@ def update_fx_rate() -> Tuple[Response, int]:
         from_currency = data.get('from_currency')
         to_currency = data.get('to_currency')
         rate = data.get('rate')
-        
+
         if not all([from_currency, to_currency, rate]):
             return jsonify({"error": "Missing required fields"}), 400
-        
+
         rate = Decimal(str(rate))
         FxService.update_rate(from_currency, to_currency, rate)
-        
+
         return jsonify({
             "success": True,
             "message": f"Updated rate {from_currency}/{to_currency} to {rate}"
         }), 200
-        
+
     except (ValueError, InvalidOperation) as e:
         return jsonify({"error": "Invalid rate value"}), 400
-    except Exception as e:
+    except Exception:
         return jsonify({"error": "Internal server error"}), 500
