@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify
+from __future__ import annotations
+from flask import Blueprint, request, jsonify, Response
 from app.services import WalletService, FxService
 from decimal import Decimal, InvalidOperation
 from marshmallow import Schema, fields, ValidationError
+from typing import Tuple, Union, Any, Dict
 
 bp = Blueprint('main', __name__)
 
@@ -19,7 +21,7 @@ class WithdrawFundsSchema(Schema):
     amount = fields.Decimal(required=True, places=8)
 
 @bp.route('/')
-def index():
+def index() -> Response:
     return jsonify({
         "message": "FX Payment Processor API",
         "version": "1.0.0",
@@ -35,7 +37,7 @@ def index():
     })
 
 @bp.route('/wallets/<user_id>/fund', methods=['POST'])
-def fund_wallet(user_id):
+def fund_wallet(user_id: str) -> Tuple[Response, int]:
     try:
         schema = FundWalletSchema()
         data = schema.load(request.json)
@@ -56,7 +58,7 @@ def fund_wallet(user_id):
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/convert', methods=['POST'])
-def convert_currency(user_id):
+def convert_currency(user_id: str) -> Tuple[Response, int]:
     try:
         schema = ConvertCurrencySchema()
         data = schema.load(request.json)
@@ -78,7 +80,7 @@ def convert_currency(user_id):
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/withdraw', methods=['POST'])
-def withdraw_funds(user_id):
+def withdraw_funds(user_id: str) -> Tuple[Response, int]:
     try:
         schema = WithdrawFundsSchema()
         data = schema.load(request.json)
@@ -99,7 +101,7 @@ def withdraw_funds(user_id):
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/balances', methods=['GET'])
-def get_balances(user_id):
+def get_balances(user_id: str) -> Tuple[Response, int]:
     try:
         balances = WalletService.get_balances(user_id)
         return jsonify(balances), 200
@@ -108,7 +110,7 @@ def get_balances(user_id):
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/transactions', methods=['GET'])
-def get_transactions(user_id):
+def get_transactions(user_id: str) -> Tuple[Response, int]:
     try:
         limit = request.args.get('limit', 100, type=int)
         transactions = WalletService.get_transactions(user_id, limit)
@@ -118,7 +120,7 @@ def get_transactions(user_id):
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/wallets/<user_id>/reconcile', methods=['GET'])
-def reconcile_balances(user_id):
+def reconcile_balances(user_id: str) -> Tuple[Response, int]:
     try:
         result = WalletService.reconcile_balances(user_id)
         return jsonify(result), 200
@@ -127,7 +129,7 @@ def reconcile_balances(user_id):
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/fx/rates', methods=['GET'])
-def get_fx_rates():
+def get_fx_rates() -> Tuple[Response, int]:
     try:
         rates = FxService.get_all_rates()
         return jsonify({"rates": rates}), 200
@@ -136,7 +138,7 @@ def get_fx_rates():
         return jsonify({"error": "Internal server error"}), 500
 
 @bp.route('/fx/rates', methods=['PUT'])
-def update_fx_rate():
+def update_fx_rate() -> Tuple[Response, int]:
     try:
         data = request.json
         from_currency = data.get('from_currency')

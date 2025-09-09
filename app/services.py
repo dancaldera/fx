@@ -1,8 +1,10 @@
+from __future__ import annotations
 from app import db
 from app.models import Wallet, Transaction, FxRate, TransactionType
 from decimal import Decimal, ROUND_DOWN
 from sqlalchemy import func
 from flask import current_app
+from typing import Dict, List, Any, Optional, Union
 
 class WalletService:
     
@@ -16,7 +18,7 @@ class WalletService:
         return wallet
     
     @staticmethod
-    def fund_wallet(user_id: str, currency: str, amount: Decimal) -> dict:
+    def fund_wallet(user_id: str, currency: str, amount: Decimal) -> Dict[str, Any]:
         if amount <= 0:
             raise ValueError("Amount must be greater than 0")
         
@@ -40,7 +42,7 @@ class WalletService:
         }
     
     @staticmethod
-    def withdraw_funds(user_id: str, currency: str, amount: Decimal) -> dict:
+    def withdraw_funds(user_id: str, currency: str, amount: Decimal) -> Dict[str, Any]:
         if amount <= 0:
             raise ValueError("Amount must be greater than 0")
         
@@ -68,7 +70,7 @@ class WalletService:
         }
     
     @staticmethod
-    def convert_currency(user_id: str, from_currency: str, to_currency: str, amount: Decimal) -> dict:
+    def convert_currency(user_id: str, from_currency: str, to_currency: str, amount: Decimal) -> Dict[str, Any]:
         if amount <= 0:
             raise ValueError("Amount must be greater than 0")
         
@@ -119,9 +121,9 @@ class WalletService:
         }
     
     @staticmethod
-    def get_balances(user_id: str) -> dict:
+    def get_balances(user_id: str) -> Dict[str, float]:
         wallets = Wallet.query.filter_by(user_id=user_id).all()
-        balances = {}
+        balances: Dict[str, float] = {}
         
         for wallet in wallets:
             if wallet.balance > 0:
@@ -130,13 +132,13 @@ class WalletService:
         return balances
     
     @staticmethod
-    def get_transactions(user_id: str, limit: int = 100) -> list:
+    def get_transactions(user_id: str, limit: int = 100) -> List[Dict[str, Any]]:
         transactions = Transaction.query.filter_by(user_id=user_id)\
             .order_by(Transaction.created_at.desc())\
             .limit(limit)\
             .all()
         
-        result = []
+        result: List[Dict[str, Any]] = []
         for txn in transactions:
             result.append({
                 "id": txn.id,
@@ -152,9 +154,9 @@ class WalletService:
         return result
     
     @staticmethod
-    def reconcile_balances(user_id: str) -> dict:
+    def reconcile_balances(user_id: str) -> Dict[str, Any]:
         transactions = Transaction.query.filter_by(user_id=user_id).all()
-        calculated_balances = {}
+        calculated_balances: Dict[str, Decimal] = {}
         
         for txn in transactions:
             currency = txn.currency
@@ -170,12 +172,12 @@ class WalletService:
             elif txn.transaction_type == TransactionType.CONVERT_OUT:
                 calculated_balances[currency] -= txn.amount
         
-        actual_balances = {}
+        actual_balances: Dict[str, Decimal] = {}
         wallets = Wallet.query.filter_by(user_id=user_id).all()
         for wallet in wallets:
             actual_balances[wallet.currency] = wallet.balance
         
-        discrepancies = {}
+        discrepancies: Dict[str, Dict[str, float]] = {}
         all_currencies = set(calculated_balances.keys()) | set(actual_balances.keys())
         
         for currency in all_currencies:
@@ -196,7 +198,7 @@ class WalletService:
 class FxService:
     
     @staticmethod
-    def initialize_rates():
+    def initialize_rates() -> None:
         rates = [
             ("USD", "MXN", Decimal('18.70')),
             ("MXN", "USD", Decimal('0.053')),
@@ -222,7 +224,7 @@ class FxService:
         return fx_rate.rate
     
     @staticmethod
-    def update_rate(from_currency: str, to_currency: str, rate: Decimal):
+    def update_rate(from_currency: str, to_currency: str, rate: Decimal) -> FxRate:
         fx_rate = FxRate.query.filter_by(from_currency=from_currency, to_currency=to_currency).first()
         if fx_rate:
             fx_rate.rate = rate
@@ -234,9 +236,9 @@ class FxService:
         return fx_rate
     
     @staticmethod
-    def get_all_rates() -> dict:
+    def get_all_rates() -> Dict[str, Dict[str, Any]]:
         rates = FxRate.query.all()
-        result = {}
+        result: Dict[str, Dict[str, Any]] = {}
         for rate in rates:
             pair = f"{rate.from_currency}/{rate.to_currency}"
             result[pair] = {
