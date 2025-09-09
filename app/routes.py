@@ -39,13 +39,16 @@ def index() -> Response:
 @bp.route('/wallets/<user_id>/fund', methods=['POST'])
 def fund_wallet(user_id: str) -> Tuple[Response, int]:
     try:
+        if request.json is None:
+            return jsonify({"error": "Request body must be JSON"}), 400
+
         schema = FundWalletSchema()
         data = schema.load(request.json)
 
         result = WalletService.fund_wallet(
             user_id=user_id,
-            currency=data['currency'],
-            amount=data['amount']
+            currency=data['currency'],  # type: ignore[typeddict-item]
+            amount=data['amount']  # type: ignore[typeddict-item]
         )
 
         return jsonify(result), 200
@@ -60,14 +63,17 @@ def fund_wallet(user_id: str) -> Tuple[Response, int]:
 @bp.route('/wallets/<user_id>/convert', methods=['POST'])
 def convert_currency(user_id: str) -> Tuple[Response, int]:
     try:
+        if request.json is None:
+            return jsonify({"error": "Request body must be JSON"}), 400
+            
         schema = ConvertCurrencySchema()
         data = schema.load(request.json)
 
         result = WalletService.convert_currency(
             user_id=user_id,
-            from_currency=data['from_currency'],
-            to_currency=data['to_currency'],
-            amount=data['amount']
+            from_currency=data['from_currency'],  # type: ignore[typeddict-item]
+            to_currency=data['to_currency'],  # type: ignore[typeddict-item]
+            amount=data['amount']  # type: ignore[typeddict-item]
         )
 
         return jsonify(result), 200
@@ -82,13 +88,16 @@ def convert_currency(user_id: str) -> Tuple[Response, int]:
 @bp.route('/wallets/<user_id>/withdraw', methods=['POST'])
 def withdraw_funds(user_id: str) -> Tuple[Response, int]:
     try:
+        if request.json is None:
+            return jsonify({"error": "Request body must be JSON"}), 400
+            
         schema = WithdrawFundsSchema()
         data = schema.load(request.json)
 
         result = WalletService.withdraw_funds(
             user_id=user_id,
-            currency=data['currency'],
-            amount=data['amount']
+            currency=data['currency'],  # type: ignore[typeddict-item]
+            amount=data['amount']  # type: ignore[typeddict-item]
         )
 
         return jsonify(result), 200
@@ -140,6 +149,9 @@ def get_fx_rates() -> Tuple[Response, int]:
 @bp.route('/fx/rates', methods=['PUT'])
 def update_fx_rate() -> Tuple[Response, int]:
     try:
+        if request.json is None:
+            return jsonify({"error": "Request body must be JSON"}), 400
+            
         data = request.json
         from_currency = data.get('from_currency')
         to_currency = data.get('to_currency')

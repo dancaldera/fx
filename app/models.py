@@ -3,7 +3,7 @@ from app import db
 from datetime import datetime, timezone
 from decimal import Decimal
 from sqlalchemy import Integer, String, DECIMAL, DateTime, Enum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column  # type: ignore[attr-defined]
 from typing import Optional
 import enum
 

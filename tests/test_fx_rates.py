@@ -34,6 +34,7 @@ class TestFxRatesEndpoints:
             assert data['success'] is True
 
             fx_rate = FxRate.query.filter_by(from_currency='USD', to_currency='MXN').first()
+            assert fx_rate is not None
             assert fx_rate.rate == Decimal('19.5')
 
     def test_update_fx_rate_missing_fields(self, client):

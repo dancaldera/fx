@@ -234,7 +234,9 @@ class TestWalletServices:
             usd_wallet = Wallet.query.filter_by(user_id='user1', currency='USD').first()
             mxn_wallet = Wallet.query.filter_by(user_id='user1', currency='MXN').first()
 
+            assert usd_wallet is not None
             assert usd_wallet.balance == Decimal('500')
+            assert mxn_wallet is not None
             assert mxn_wallet.balance == Decimal('9350.00000000')
 
     def test_convert_same_currency(self, app):

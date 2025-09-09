@@ -10,7 +10,7 @@ class WalletService:
     def get_or_create_wallet(user_id: str, currency: str) -> Wallet:
         wallet = Wallet.query.filter_by(user_id=user_id, currency=currency).first()
         if not wallet:
-            wallet = Wallet(user_id=user_id, currency=currency, balance=Decimal('0'))
+            wallet = Wallet(user_id=user_id, currency=currency, balance=Decimal('0'))  # type: ignore[call-arg]
             db.session.add(wallet)
             db.session.commit()
         return wallet
@@ -24,10 +24,10 @@ class WalletService:
         wallet.balance += amount
 
         transaction = Transaction(
-            user_id=user_id,
-            transaction_type=TransactionType.FUND,
-            currency=currency,
-            amount=amount
+            user_id=user_id,  # type: ignore[call-arg]
+            transaction_type=TransactionType.FUND,  # type: ignore[call-arg]
+            currency=currency,  # type: ignore[call-arg]
+            amount=amount  # type: ignore[call-arg]
         )
 
         db.session.add(transaction)
@@ -52,10 +52,10 @@ class WalletService:
         wallet.balance -= amount
 
         transaction = Transaction(
-            user_id=user_id,
-            transaction_type=TransactionType.WITHDRAW,
-            currency=currency,
-            amount=amount
+            user_id=user_id,  # type: ignore[call-arg]
+            transaction_type=TransactionType.WITHDRAW,  # type: ignore[call-arg]
+            currency=currency,  # type: ignore[call-arg]
+            amount=amount  # type: ignore[call-arg]
         )
 
         db.session.add(transaction)
@@ -88,23 +88,23 @@ class WalletService:
         to_wallet.balance += converted_amount
 
         out_transaction = Transaction(
-            user_id=user_id,
-            transaction_type=TransactionType.CONVERT_OUT,
-            currency=from_currency,
-            amount=amount,
-            from_currency=from_currency,
-            to_currency=to_currency,
-            fx_rate=fx_rate
+            user_id=user_id,  # type: ignore[call-arg]
+            transaction_type=TransactionType.CONVERT_OUT,  # type: ignore[call-arg]
+            currency=from_currency,  # type: ignore[call-arg]
+            amount=amount,  # type: ignore[call-arg]
+            from_currency=from_currency,  # type: ignore[call-arg]
+            to_currency=to_currency,  # type: ignore[call-arg]
+            fx_rate=fx_rate  # type: ignore[call-arg]
         )
 
         in_transaction = Transaction(
-            user_id=user_id,
-            transaction_type=TransactionType.CONVERT_IN,
-            currency=to_currency,
-            amount=converted_amount,
-            from_currency=from_currency,
-            to_currency=to_currency,
-            fx_rate=fx_rate
+            user_id=user_id,  # type: ignore[call-arg]
+            transaction_type=TransactionType.CONVERT_IN,  # type: ignore[call-arg]
+            currency=to_currency,  # type: ignore[call-arg]
+            amount=converted_amount,  # type: ignore[call-arg]
+            from_currency=from_currency,  # type: ignore[call-arg]
+            to_currency=to_currency,  # type: ignore[call-arg]
+            fx_rate=fx_rate  # type: ignore[call-arg]
         )
 
         db.session.add(out_transaction)
@@ -205,7 +205,7 @@ class FxService:
         for from_curr, to_curr, rate in rates:
             existing = FxRate.query.filter_by(from_currency=from_curr, to_currency=to_curr).first()
             if not existing:
-                fx_rate = FxRate(from_currency=from_curr, to_currency=to_curr, rate=rate)
+                fx_rate = FxRate(from_currency=from_curr, to_currency=to_curr, rate=rate)  # type: ignore[call-arg]
                 db.session.add(fx_rate)
 
         db.session.commit()
@@ -227,7 +227,7 @@ class FxService:
         if fx_rate:
             fx_rate.rate = rate
         else:
-            fx_rate = FxRate(from_currency=from_currency, to_currency=to_currency, rate=rate)
+            fx_rate = FxRate(from_currency=from_currency, to_currency=to_currency, rate=rate)  # type: ignore[call-arg]
             db.session.add(fx_rate)
 
         db.session.commit()
