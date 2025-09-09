@@ -76,6 +76,10 @@ docker run --name fx-postgres -e POSTGRES_USER=fx_user -e POSTGRES_PASSWORD=fx_p
 python app.py
 ```
 
+### Postgres db Migration Setup
+
+Check [migrations/README.md](./migrations/README.md) to see how to run migrations if its not initialized yet
+
 ### Running Tests
 ```bash
 # Run all tests
@@ -199,6 +203,7 @@ Response:
 ## Additional Documentation
 
 - **[API_EXAMPLES.md](API_EXAMPLES.md)**: Detailed API usage examples with curl commands
+- **[migrations/README.md](./migrations/README.md)**: Database migration guide if postgres hasn't been initialized yet
 - **[DEPLOYMENT.md](DEPLOYMENT.md)**: Complete deployment guide for development and production environments
 - **tests/**: Comprehensive test suite with 95%+ coverage
 
