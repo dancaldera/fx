@@ -88,6 +88,15 @@ pytest --cov=app
 pytest tests/test_wallets.py -v
 ```
 
+### Type Checking
+```bash
+# Run pyright type checker
+pyright app/ app.py
+
+# Python syntax validation
+python3 -m py_compile app/__init__.py app/models.py app/services.py app/routes.py app.py
+```
+
 ## API Documentation
 
 ### Fund Wallet
