@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from sqlalchemy import Integer, String, DECIMAL, DateTime, Enum
 from sqlalchemy.orm import Mapped, mapped_column
@@ -20,8 +20,8 @@ class Wallet(db.Model):
     user_id: Mapped[str] = mapped_column(String(50), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
     balance: Mapped[Decimal] = mapped_column(DECIMAL(20, 8), nullable=False, default=Decimal('0'))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('user_id', 'currency', name='_user_currency_uc'),)
 
@@ -39,7 +39,7 @@ class Transaction(db.Model):
     from_currency: Mapped[Optional[str]] = mapped_column(String(3), nullable=True)
     to_currency: Mapped[Optional[str]] = mapped_column(String(3), nullable=True)
     fx_rate: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(20, 8), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self) -> str:
         return f'<Transaction {self.id}: {self.user_id} {self.transaction_type.value} {self.amount} {self.currency}>'
@@ -51,7 +51,7 @@ class FxRate(db.Model):
     from_currency: Mapped[str] = mapped_column(String(3), nullable=False)
     to_currency: Mapped[str] = mapped_column(String(3), nullable=False)
     rate: Mapped[Decimal] = mapped_column(DECIMAL(20, 8), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('from_currency', 'to_currency', name='_currency_pair_uc'),)
 
