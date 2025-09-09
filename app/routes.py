@@ -1,11 +1,25 @@
 from __future__ import annotations
 from flask import Blueprint, request, jsonify, Response
+from werkzeug.exceptions import BadRequest
 from app.services import WalletService, FxService
 from decimal import Decimal, InvalidOperation
 from marshmallow import Schema, fields, ValidationError
 from typing import Tuple
 
 bp = Blueprint('main', __name__)
+
+def get_json_data():
+    """Safely get JSON data from request with proper error handling."""
+    if request.content_type != 'application/json':
+        return None, "Request must have Content-Type: application/json"
+    
+    try:
+        data = request.get_json(force=True)
+        if data is None:
+            return None, "Request body must be valid JSON"
+        return data, None
+    except BadRequest:
+        return None, "Request body contains invalid JSON"
 
 class FundWalletSchema(Schema):
     currency = fields.Str(required=True, validate=lambda x: x in ['USD', 'MXN'])
@@ -39,11 +53,12 @@ def index() -> Response:
 @bp.route('/wallets/<user_id>/fund', methods=['POST'])
 def fund_wallet(user_id: str) -> Tuple[Response, int]:
     try:
-        if request.json is None:
-            return jsonify({"error": "Request body must be JSON"}), 400
+        json_data, error = get_json_data()
+        if error:
+            return jsonify({"error": error}), 400
 
         schema = FundWalletSchema()
-        data = schema.load(request.json)
+        data = schema.load(json_data)
 
         result = WalletService.fund_wallet(
             user_id=user_id,
@@ -63,11 +78,12 @@ def fund_wallet(user_id: str) -> Tuple[Response, int]:
 @bp.route('/wallets/<user_id>/convert', methods=['POST'])
 def convert_currency(user_id: str) -> Tuple[Response, int]:
     try:
-        if request.json is None:
-            return jsonify({"error": "Request body must be JSON"}), 400
+        json_data, error = get_json_data()
+        if error:
+            return jsonify({"error": error}), 400
             
         schema = ConvertCurrencySchema()
-        data = schema.load(request.json)
+        data = schema.load(json_data)
 
         result = WalletService.convert_currency(
             user_id=user_id,
@@ -88,11 +104,12 @@ def convert_currency(user_id: str) -> Tuple[Response, int]:
 @bp.route('/wallets/<user_id>/withdraw', methods=['POST'])
 def withdraw_funds(user_id: str) -> Tuple[Response, int]:
     try:
-        if request.json is None:
-            return jsonify({"error": "Request body must be JSON"}), 400
+        json_data, error = get_json_data()
+        if error:
+            return jsonify({"error": error}), 400
             
         schema = WithdrawFundsSchema()
-        data = schema.load(request.json)
+        data = schema.load(json_data)
 
         result = WalletService.withdraw_funds(
             user_id=user_id,
@@ -149,10 +166,11 @@ def get_fx_rates() -> Tuple[Response, int]:
 @bp.route('/fx/rates', methods=['PUT'])
 def update_fx_rate() -> Tuple[Response, int]:
     try:
-        if request.json is None:
-            return jsonify({"error": "Request body must be JSON"}), 400
+        json_data, error = get_json_data()
+        if error:
+            return jsonify({"error": error}), 400
             
-        data = request.json
+        data = json_data
         from_currency = data.get('from_currency')
         to_currency = data.get('to_currency')
         rate = data.get('rate')
