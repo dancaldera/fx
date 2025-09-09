@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: fx_user
+      POSTGRES_PASSWORD: fx_password
+      POSTGRES_DB: fx_processor
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fx_user -d fx_processor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://fx_user:fx_password@postgres:5432/fx_processor
+      FLASK_ENV: development
+      FLASK_DEBUG: "True"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: python app.py
+
+volumes:
+  postgres_data:
