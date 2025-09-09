@@ -156,7 +156,7 @@ def update_fx_rate() -> Tuple[Response, int]:
             "message": f"Updated rate {from_currency}/{to_currency} to {rate}"
         }), 200
 
-    except (ValueError, InvalidOperation) as e:
+    except (ValueError, InvalidOperation):
         return jsonify({"error": "Invalid rate value"}), 400
     except Exception:
         return jsonify({"error": "Internal server error"}), 500
