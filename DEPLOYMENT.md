@@ -37,7 +37,7 @@ This guide covers different deployment options for the FX Payment Processor.
      -e POSTGRES_DB=fx_processor \
      -p 5432:5432 \
      -d postgres:15
-   
+
    # Or install PostgreSQL locally and create database
    createdb fx_processor
    ```
@@ -92,7 +92,7 @@ docker-compose up app
    ```yaml
    # docker-compose.prod.yml
    version: '3.8'
-   
+
    services:
      postgres:
        image: postgres:15
@@ -109,7 +109,7 @@ docker-compose up app
          interval: 10s
          timeout: 5s
          retries: 5
-   
+
      app:
        build: .
        ports:
@@ -127,7 +127,7 @@ docker-compose up app
          interval: 30s
          timeout: 10s
          retries: 3
-   
+
    volumes:
      postgres_data:
    ```
@@ -153,11 +153,11 @@ docker-compose up app
    ```bash
    # Build
    docker build -t fx-payment-processor .
-   
+
    # Tag for ECR
    docker tag fx-payment-processor:latest \
      123456789012.dkr.ecr.us-east-1.amazonaws.com/fx-payment-processor:latest
-   
+
    # Push to ECR
    docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/fx-payment-processor:latest
    ```
@@ -254,10 +254,10 @@ For production, place the application behind a reverse proxy with SSL:
 server {
     listen 443 ssl http2;
     server_name your-domain.com;
-    
+
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
-    
+
     location / {
         proxy_pass http://localhost:5000;
         proxy_set_header Host $host;
@@ -322,10 +322,10 @@ gunicorn -w 4 -b 0.0.0.0:5000 --timeout 120 app:app
    ```bash
    # Check if database is running
    docker-compose ps postgres
-   
+
    # Check database logs
    docker-compose logs postgres
-   
+
    # Test connection
    docker-compose exec postgres psql -U fx_user -d fx_processor -c "SELECT 1;"
    ```
@@ -334,10 +334,10 @@ gunicorn -w 4 -b 0.0.0.0:5000 --timeout 120 app:app
    ```bash
    # Check application logs
    docker-compose logs app
-   
+
    # Check application health
    curl http://localhost:5000/
-   
+
    # Check database connectivity from app
    docker-compose exec app python -c "from app import db; print('DB OK' if db else 'DB Error')"
    ```
@@ -346,7 +346,7 @@ gunicorn -w 4 -b 0.0.0.0:5000 --timeout 120 app:app
    ```bash
    # Monitor resource usage
    docker stats
-   
+
    # Check application metrics
    # Implement /metrics endpoint with prometheus_client if needed
    ```

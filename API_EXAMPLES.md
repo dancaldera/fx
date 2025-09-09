@@ -265,7 +265,7 @@ curl -X POST http://localhost:5000/wallets/alice/fund \
   -H "Content-Type: application/json" \
   -d '{"currency": "USD", "amount": 2000}'
 
-# 2. Fund MXN wallet  
+# 2. Fund MXN wallet
 curl -X POST http://localhost:5000/wallets/alice/fund \
   -H "Content-Type: application/json" \
   -d '{"currency": "MXN", "amount": 10000}'
